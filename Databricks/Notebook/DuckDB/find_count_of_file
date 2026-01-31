@@ -1,0 +1,16 @@
+import duckdb
+import os
+
+csv_file = "E:/DWH/Databricks/Notebook/Dataset/*.parquet"
+print("CSV file path:", csv_file)
+
+# Connect to DuckDB
+con = duckdb.connect()
+print("Connected to DuckDB")
+
+df = con.execute(f"""
+CREATE TABLE transactions AS SELECT * FROM 'E:/DWH/Databricks/Notebook/Dataset/*.parquet';
+DESCRIBE transactions;
+        """)
+
+print(f"Total number of rows in the CSV file: {df}")

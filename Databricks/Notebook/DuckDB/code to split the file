@@ -1,0 +1,36 @@
+import duckdb
+import os
+
+csv_file = "E:/DWH/Databricks/dataset/simulated-transactions/versions/1/transactions.csv"
+print("CSV file path:", csv_file)
+output_dir = "E:/DWH/Databricks/Notebook/Dataset/"
+os.makedirs(output_dir, exist_ok=True)
+print("Output directory:", output_dir)
+# Connect to DuckDB
+con = duckdb.connect()
+print("Connected to DuckDB")
+# Define chunk size in rows (approximate, depends on row size)
+chunk_size = 1_000_000  # adjust to hit ~500MB per file
+
+start = 0
+file_num = 1
+
+while True:
+    # Read chunk
+    df = con.execute(f"""
+        SELECT * FROM '{csv_file}' 
+        OFFSET {start} ROWS 
+        LIMIT {chunk_size}
+    """).df()
+    
+    if df.empty:
+        break
+
+    # Save chunk as Parquet
+    chunk_file = os.path.join(output_dir, f"chunk_{file_num}.parquet")
+    df.to_parquet(chunk_file, engine='pyarrow', index=False)
+    
+    print(f"Saved {chunk_file}, rows: {len(df)}")
+    
+    start += chunk_size
+    file_num += 1
