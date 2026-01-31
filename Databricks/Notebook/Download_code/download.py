@@ -4,3 +4,4 @@ import kagglehub
 path = kagglehub.dataset_download("conorsully1/simulated-transactions")
 
 print("Path to dataset files:", path)
+print("Files:", os.listdir(path))
